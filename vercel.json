@@ -1,0 +1,7 @@
+{
+  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "outputDirectory": ".next",
+  "env": {
+    "PRISMA_QUERY_ENGINE_BINARY": "/var/task/node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node"
+  }
+}

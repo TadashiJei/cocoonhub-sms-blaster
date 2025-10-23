@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "build": "npm run prisma:generate && npm run prisma:migrate && next build",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate"
@@ -35,7 +37,7 @@
     "@types/uuid": "^9.0.7"
   },
   "engines": {
-    "node": "18.x || 20.x"
+    "node": "18.17.0"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
