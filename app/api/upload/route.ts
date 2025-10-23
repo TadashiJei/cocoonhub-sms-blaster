@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import * as XLSX from 'xlsx';
-
-const prisma = new PrismaClient();
 
 interface RecipientData {
   phoneNumber: string;

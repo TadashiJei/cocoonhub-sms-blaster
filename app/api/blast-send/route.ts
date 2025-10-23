@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 import { getTemplateById, generateMessage as generateMessageFromTemplate } from '@/lib/message-templates';
-
-const prisma = new PrismaClient();
 const SEMAPHORE_API_KEY = process.env.SEMAPHORE_API_KEY;
 const BATCH_SIZE = 50;
 
