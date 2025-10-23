@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate --skip-engine-check && prisma migrate deploy --skip-generate && next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate"
@@ -35,12 +35,9 @@
     "@types/uuid": "^9.0.7"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "18.x || 20.x"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
-  },
-  "overrides": {
-    "@prisma/client": "^5.8.0"
   }
 }
