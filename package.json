@@ -11,7 +11,13 @@
   "dependencies": {
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "next": "16.0.0"
+    "next": "16.0.0",
+    "@prisma/client": "^5.8.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "csv-parser": "^3.0.0",
+    "xlsx": "^0.18.5",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "typescript": "^5",
@@ -21,6 +27,10 @@
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "16.0.0"
+    "eslint-config-next": "16.0.0",
+    "prisma": "^5.8.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/uuid": "^9.0.7"
   }
 }

@@ -1,0 +1,308 @@
+🚀 Project Blaster: SMS Communication System
+
+Domain: blaster.cocoonhub.link (Assumed Subdomain)
+Goal: To automate the personalized delivery of payment and logistics notifications to customers based on imported spreadsheet data, ensuring accurate tracking of message status.
+
+1. Technology Stack
+
+Component
+
+Technology
+
+Rationale
+
+Frontend & Backend API
+
+Next.js (App Router)
+
+Provides a unified environment for the user interface and secure API routes for database interaction and external SMS services.
+
+Database
+
+PostgreSQL
+
+Robust, open-source relational database ideal for structured data, concurrent updates, and reliable tracking of recipient status.
+
+SMS Gateway
+
+Semaphore
+
+Chosen provider for secure and reliable communication within the Philippines.
+
+Styling
+
+Tailwind CSS (Recommended)
+
+Utility-first framework for rapid and responsive UI development.
+
+DB Client/ORM
+
+Prisma (Recommended)
+
+Provides type-safe and efficient database queries.
+
+2. Core Data Structures (PostgreSQL Schema)
+
+The database will now contain two core tables: users for application access control and recipients for the messaging data.
+
+Table: users (Authentication & Authorization)
+
+This table handles user credentials and role-based access control (RBAC).
+
+Column Name
+
+Data Type
+
+Constraint
+
+Description
+
+id
+
+SERIAL
+
+PRIMARY KEY
+
+Unique user identifier.
+
+username
+
+VARCHAR(50)
+
+NOT NULL, UNIQUE
+
+User's login handle.
+
+email
+
+VARCHAR(100)
+
+NOT NULL, UNIQUE
+
+User's email address (for recovery/contact).
+
+password_hash
+
+VARCHAR(100)
+
+NOT NULL
+
+Securely hashed password (e.g., using bcrypt).
+
+role
+
+VARCHAR(20)
+
+NOT NULL
+
+Access level: ADMIN (full control) or OPERATOR (blast & import).
+
+created_at
+
+TIMESTAMP
+
+NOT NULL
+
+Account creation timestamp.
+
+Table: recipients (Messaging Data)
+
+Column Name
+
+Data Type
+
+Constraint
+
+Description
+
+id
+
+SERIAL
+
+PRIMARY KEY
+
+Unique identifier for each record.
+
+phone_number
+
+VARCHAR(20)
+
+NOT NULL
+
+The recipient's mobile number (e.g., +63917...).
+
+name
+
+VARCHAR(100)
+
+NOT NULL
+
+The recipient's full name (for personalization).
+
+price
+
+NUMERIC(10, 2)
+
+NOT NULL
+
+The delivery fee price (e.g., 110.00).
+
+item_type
+
+VARCHAR(20)
+
+NOT NULL
+
+The item being delivered: Certificate/s or Card/s.
+
+status
+
+VARCHAR(10)
+
+NOT NULL
+
+Tracking status: PENDING, SENT, or FAILED.
+
+sent_at
+
+TIMESTAMP
+
+NULLABLE
+
+Date and time the message was successfully sent.
+
+batch_id
+
+VARCHAR(50)
+
+NOT NULL
+
+Identifier to group records from a single CSV upload (e.g., OCT23-2025-BATCH-1).
+
+api_response
+
+TEXT
+
+NULLABLE
+
+Full response message from the SMS provider for debugging.
+
+3. Personalized Message Template
+
+The application will dynamically generate the message by substituting three variables: [Name], [Item Type], and [Price ₱].
+
+Message Structure
+
+Variable
+
+Source
+
+Example Output
+
+(Name)
+
+recipients.name
+
+Juan A. Dela Cruz
+
+(Item Type)
+
+recipients.item_type
+
+certificate/s or card/s
+
+(Price ₱)
+
+recipients.price
+
+110.00
+
+Full Template:
+
+Hello, (Name)! Good day. This is the Bangko Maharlika Logistics Department. The delivery fee of your (Item Type) via J&T is (Price ₱) pesos. Please send payment to this bank account. Thank you very much!
+
+*THIS BPI ACCOUNT IS STRICTLY FOR DELIVERY FEE PAYMENTS ONLY*
+
+Bank: BPI
+Account Name: Jose Piero Longa
+Account Number: 4489069194
+
+
+
+4. Application Workflow & API Routes
+
+4.0. User Authentication Flow
+
+UI Action: User navigates to /login or /signup.
+
+Next.js API Route: /api/auth/login and /api/auth/signup
+
+Signup: Validates Username/Email/Password strength, hashes the password (using NextAuth/Bcrypt), and inserts a new user record into the users table with a default role.
+
+Login: Validates credentials against the hashed password, and upon success, creates a secure session token (JWT) to be stored client-side for subsequent API calls.
+
+Authorization: All subsequent API routes (4.1 and 4.2) require a valid token and will check the user's role before proceeding.
+
+4.1. Data Import (CSV Upload)
+
+UI Action: Administrator uploads a CSV file (containing Number, Name, Price, Item Type).
+
+Next.js API Route: /api/upload
+
+Check Authorization: Verify the authenticated user's token and ensure they have a role (e.g., ADMIN or OPERATOR) permitted to import data.
+
+Receives the file and parses its contents.
+
+Validates data format (e.g., ensures phone numbers start with +63).
+
+Generates a unique batch_id.
+
+Bulk inserts all valid rows into the recipients table, setting status to PENDING.
+
+Returns a count of records added.
+
+4.2. Core Blasting Process
+
+UI Action: Administrator clicks the "Start SMS Blast" button for a specific batch.
+
+Next.js API Route: /api/blast-send
+
+Check Authorization: Verify the authenticated user's token and ensure they have a role (e.g., ADMIN or OPERATOR) permitted to initiate the blast.
+
+Fetches a limited number of records (e.g., 50-100 at a time) from the recipients table where status = 'PENDING'.
+
+Iterates through each pending recipient:
+
+Generates the personalized message using the template.
+
+Calls the external SMS Gateway API (Semaphore).
+
+Crucial Step: On success, immediately updates the record in PostgreSQL: status = 'SENT', sent_at = NOW(), and logs the api_response.
+
+On failure, updates the record: status = 'FAILED' and logs the detailed api_response.
+
+Logs total messages processed for the job.
+
+4.3. Admin Dashboard (UI)
+
+Requires the user to be authenticated and authorized to view.
+
+Displays a list of uploaded batches.
+
+Shows a real-time table of all recipients with columns for Name, Phone Number, Item Type, Price, and Status.
+
+Provides filtering capabilities (e.g., filter by PENDING, SENT, or FAILED).
+
+5. Security Best Practices
+
+User Authentication: Implement secure Login/Signup using a library like NextAuth.js or custom JWT token management for session handling.
+
+Password Hashing: Passwords must be stored using a strong, industry-standard hashing algorithm (e.g., bcrypt) in the users table.
+
+Role-Based Access Control (RBAC): Every Next.js API route will check the user's assigned role (ADMIN or OPERATOR) to ensure they have the necessary permissions before executing actions (e.g., only ADMIN can create new user accounts).
+
+Environment Variables: All sensitive credentials (DB connection strings, SMS API keys/Semaphore credentials, BPI account number/name) will be stored exclusively in server-side environment variables (.env.local) and only accessed within Next.js API Routes.
+
+Input Validation: Robust validation will be applied during the CSV import and user signup processes to ensure data integrity and prevent injection issues.
+
+Role Separation: Data access and blasting actions are restricted to authenticated, authorized users via secure Next.js API routes.
